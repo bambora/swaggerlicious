@@ -1,0 +1,25 @@
+{
+  "name": "@bambora/swaggerlicious",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "start": "rimraf dist && tsc -w",
+    "build": "rimraf dist && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jesper Dalgas Zachariassen <jesper.zachariassen@bambora.com> (http://bambora.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/fs-extra": "0.0.37",
+    "@types/ramda": "0.0.3",
+    "@types/swagger-schema-official": "^2.0.1",
+    "rimraf": "^2.6.1",
+    "typescript": "^2.2.1"
+  },
+  "dependencies": {
+    "json-refs": "^2.1.6",
+    "ramda": "^0.23.0"
+  }
+}
