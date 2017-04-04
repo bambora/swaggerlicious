@@ -1,6 +1,6 @@
 {
   "name": "@bambora/swaggerlicious",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -9,8 +9,16 @@
     "build": "rimraf dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bambora/swaggerlicious.git"
+  },
   "author": "Jesper Dalgas Zachariassen <jesper.zachariassen@bambora.com> (http://bambora.com)",
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bambora/swaggerlicious/issues"
+  },
+  "homepage": "https://github.com/bambora/swaggerlicious#readme",
   "devDependencies": {
     "@types/fs-extra": "0.0.37",
     "@types/ramda": "0.0.3",
