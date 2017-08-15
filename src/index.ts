@@ -1,5 +1,5 @@
 import * as R       from "ramda";
-import * as OpenAPI from "@types/swagger-schema-official";
+import * as OpenAPI from "swagger-schema-official";
 
 const jsonRefs = require("json-refs");
 
@@ -209,7 +209,7 @@ export function getExampleValue(
     if (property.type === "array") {
         return [
             traverseAndConstructExample(
-                property.items,
+                property.items as OpenAPI.Schema,
                 onlyRequired,
                 (nestingLevel || 0) + 1
             )
