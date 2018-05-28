@@ -16,7 +16,7 @@ export default function swaggerlicious(jsonSpecification: OpenAPI.Spec) {
 }
 
 export function createReferenceLookupTable(specification: OpenAPI.Spec): Promise<ReferenceLookupTable> {
-    return jsonRefs.resolveRefs(specification).then(({ refs }) => {
+    return jsonRefs.resolveRefs(specification, { resolveCirculars: true }).then(({ refs }) => {
         const referenceLookupTable: ReferenceLookupTable = {};
 
         R.mapObjIndexed<any, void>(
@@ -107,6 +107,10 @@ export type Properties = {
     [propertyName: string]: OpenAPI.Schema
 };
 
+export interface RecursiveNesting {
+    [rootNestingKey: number]: number;
+ } 
+
 export function getExampleRequest(
     operation            : IOperation,
     referenceLookupTable : ReferenceLookupTable,
@@ -148,7 +152,9 @@ export function getExampleResponse(
 export function traverseAndConstructExample(
     propertyOrDefinition : OpenAPI.Schema,
     onlyRequired         : boolean,
-    nestingLevel         : number
+    nestingLevel         : number,
+    recursiveKey?        : string,
+    recursiveNestingLevel? : RecursiveNesting
 ) {
     if (!propertyOrDefinition) return null;
     if (onlyRequired && !propertyOrDefinition.required) return null;
@@ -168,7 +174,7 @@ export function traverseAndConstructExample(
 
     R.mapObjIndexed<OpenAPI.Schema, void>(
         (property, name) => {
-            exampleRequest[name] = getExampleValue(property, onlyRequired, nestingLevel);
+            exampleRequest[name] = getExampleValue(name, property, onlyRequired, nestingLevel, recursiveKey, recursiveNestingLevel);
         },
         properties
     );
@@ -177,10 +183,13 @@ export function traverseAndConstructExample(
 }
 
 export function getExampleValue(
+    name         : string,
     property     : OpenAPI.Schema,
     onlyRequired : boolean,
-    nestingLevel : number
-): any {
+    nestingLevel : number,
+    recursiveKey?: string,
+    recursiveNestingLevel?: RecursiveNesting
+): any { 
     if (property.example)
         return property.example;
 
@@ -204,14 +213,30 @@ export function getExampleValue(
     if (property.type === "boolean")
         return false;
 
-    if (nestingLevel > 2) return;
+    //General max nesting
+    if (nestingLevel > 10) return;
+
+    // Find current recursiveNestingLevel
+    if(recursiveNestingLevel === undefined) recursiveNestingLevel = {};
+
+    if (recursiveNestingLevel[recursiveKey] || 0 === 0) {
+            recursiveKey = name;
+            recursiveNestingLevel[recursiveKey] = (recursiveNestingLevel[recursiveKey] || 0) + 1;
+    }
+
+    // Look for recursive nesting
+    if (recursiveNestingLevel[recursiveKey] > 2) {
+        return [null];
+    }
 
     if (property.type === "array") {
         return [
             traverseAndConstructExample(
                 property.items as OpenAPI.Schema,
                 onlyRequired,
-                (nestingLevel || 0) + 1
+                (nestingLevel || 0) + 1,
+                recursiveKey,
+                recursiveNestingLevel
             )
         ];
     }
@@ -220,6 +245,8 @@ export function getExampleValue(
     return traverseAndConstructExample(
         property,
         onlyRequired,
-        (nestingLevel || 0) + 1
+        (nestingLevel || 0) + 1,
+        recursiveKey,
+        recursiveNestingLevel
     );
 }
